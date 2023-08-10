@@ -16,6 +16,7 @@ const StyledButton = styled.button`
     0 5px 6.1px rgba(243, 152, 19, 0.076),
     0 10.1px 11.4px rgba(243, 152, 19, 0.086);
   transition-duration: .4s;
+  cursor: pointer;
   &:hover{
     background: #EE730D;
   }
@@ -28,11 +29,12 @@ interface Props {
   children: ReactNode;
   icon: IconDefinition;
   disabled?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
-const Component = ({ children, icon, disabled = false }: Props) => {
+const Component = ({ children, icon, disabled = false, onClick = () => {} }: Props) => {
   return (
-    <StyledButton disabled={disabled}>
+    <StyledButton disabled={disabled} onClick={onClick}>
       <Icon icon={icon} />
       {children}
     </StyledButton>
