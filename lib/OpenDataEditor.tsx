@@ -64,14 +64,10 @@ const OpenDataEditor = ({ data, onDataUpdate }: Props): JSX.Element => {
   const [ features, setFeatures ] = React.useState<Row[]>([]);
   const [ filename, setFilename ] = React.useState<string>('');
   const [ editMode, setEditMode ] = React.useState(false);
+  const [ uploaderShown, setUploaderShown ] = React.useState(true);
   const [ , setFitBounds ] = React.useState(false);
   const [ selectedRowId, setSelectedRowId ] = React.useState<string | null>(null);
   const [ selectedOn, setSelectedOn ] = React.useState<string | null>(null);
-
-  const hideUploader = () => {
-    const el = document.querySelector('.uploader') as HTMLElement;
-    el.style.display = 'none';
-  };
 
   React.useEffect(() => {
     if (data) {
@@ -80,7 +76,7 @@ const OpenDataEditor = ({ data, onDataUpdate }: Props): JSX.Element => {
         header: true,
       });
       setFeatures(addIdToFeatures(formattedData));
-      hideUploader();
+      setUploaderShown(false);
     } else if (location.search) {
       const params = new URLSearchParams(location.search);
       const path = params.get('data');
@@ -98,7 +94,7 @@ const OpenDataEditor = ({ data, onDataUpdate }: Props): JSX.Element => {
             from: 'AUTO',
             type: 'string',
           });
-          hideUploader();
+          setUploaderShown(false);
           const features = csv2rows(unicodeData);
           setFitBounds(true);
           setFeatures(addIdToFeatures(features));
@@ -106,10 +102,37 @@ const OpenDataEditor = ({ data, onDataUpdate }: Props): JSX.Element => {
     }
   }, [data]);
 
+  React.useEffect(() => {
+    console.log(`filename changed: ${filename}`)
+  }, [filename]);
+  React.useEffect(() => {
+    console.log(`uploader shown: ${uploaderShown}`)
+  }, [uploaderShown]);
+
   return (
-    <OuterWrapper>
+    <OuterWrapper
+      onDragEnter={(evt) => {
+        evt.stopPropagation();
+        setUploaderShown(true);
+      }}
+      onDragLeave={ (evt) => {
+        evt.stopPropagation();
+        if (filename) {
+          setUploaderShown(false);
+        }
+      }}
+    >
       <InnerWrapper>
-        <StyledUploader setFeatures={setFeatures} filename={filename} setFilename={setFilename} setFitBounds={setFitBounds}></StyledUploader>
+        { uploaderShown ? (
+          <StyledUploader
+            setFeatures={setFeatures}
+            filename={filename}
+            shown={uploaderShown}
+            setFilename={setFilename}
+            setFitBounds={setFitBounds}
+            onDataLoad={() => setUploaderShown(false)}
+          />
+        ) : null }
         <Download features={features} filename={filename} />
 
         <StyledMap

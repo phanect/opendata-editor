@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import {useDropzone} from 'react-dropzone';
 
@@ -59,21 +59,33 @@ interface Props {
   className?: string; // Required to apply styles by styled-components
   setFeatures: Function;
   filename: string;
+  shown?: boolean;
   setFilename: Function;
   setFitBounds: Function;
+  onDataLoad?: () => void;
 }
 
-const Component = (props: Props) => {
-  React.useEffect(() => {
-    window.addEventListener('dragenter', showUploader);
-    if (props.filename) {
-      window.addEventListener('dragleave', hideUploader);
-    }
-  });
+const Component = ({ className, setFeatures, filename, shown: defaultShown = true, setFilename, setFitBounds, onDataLoad }: Props) => {
+  const [ shown, setShown ] = useState(defaultShown);
+
+//   React.useEffect(() => {
+//     document.body.addEventListener('dragenter', () => {
+// console.log('dragenter');
+//       setShown(true);
+//     });
+
+//     document.body.addEventListener('dragleave', () => {
+// console.log('dragleave with no filename', filename);
+//       if (filename) {
+// console.log('dragleave with filename');
+//         setShown(false);
+//       }
+//     });
+//   }, []);
 
   const onDrop = React.useCallback((acceptedFiles : any) => {
     acceptedFiles.forEach((file: any) => {
-      props.setFilename(file.name);
+      setFilename(file.name);
 
       const reader = new FileReader();
 
@@ -95,17 +107,18 @@ const Component = (props: Props) => {
           csvData = await xlsParser(data);
         }
 
-        const el = document.querySelector('.uploader') as HTMLElement;
-        el.style.display = 'none';
+        if (onDataLoad) {
+          onDataLoad();
+        }
 
-        props.setFitBounds(true);
-        props.setFeatures(addIdToFeatures(csvData));
+        setFitBounds(true);
+        setFeatures(addIdToFeatures(csvData));
       };
 
       reader.readAsArrayBuffer(file);
     });
 
-  }, [props]);
+  }, [setFilename, setFitBounds, setFeatures]);
 
   const {
     getRootProps,
@@ -120,7 +133,7 @@ const Component = (props: Props) => {
   });
 
   return (
-    <div className={props.className}>
+    <div className={className}>
       <Dropzone {...getRootProps()}>
         <input {...getInputProps()} />
         <div>
