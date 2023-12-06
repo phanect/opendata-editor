@@ -10,6 +10,5 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [react()],
-  publicDir: resolve(__dirname, 'web/public'),
-  base: process.env.NODE_ENV === 'preview' ? '/' : '/opendata-editor/',
+  base: process.env.NODE_ENV === 'gh-pages' ? '/opendata-editor/' : '/',
 });
